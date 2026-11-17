@@ -147,26 +147,40 @@
             updateMapTransform();
         };
 
-        mapContainer.addEventListener('mousedown', (e) => {
-            if (e.target.closest('button')) return;
+        const mapSvg = mapContiner.querySelector('svg');
+        let downX = 0, downY = 0, startTX = 0, startTY = 0, dragMoved = false;
+
+        mapContainer.style.touchAction= 'none';
+
+        const pxToUnits = () => 1 / Math.min(mapSvg.clientWidth / 350, mapSvg.clientHeight / 420);
+
+        mapContainer.addEventListener('pointerdown', (e) => {
+            if (e.target.closet('button')) return;
             isDragging = true;
+            dragMoved = false;
             mapContainer.style.cursor = 'grabbing';
-            startX = e.clientX - translateX;
-            startY = e.clientY - translateY;
-            updateMapTransform();
+            downX = e.clientX; downY = e.clientY;
+            startTX = translateX; startTY = translateY;
         });
-        window.addEventListener('mousemove', (e) => {
+
+        window.AddEventListener('pointermove', (e) => {
             if (!isDragging) return;
-            translateX = e.clientX - startX;
-            translateY = e.clientY - startY;
+            if (Math.hypot(e.clientX - downX, e.clientY - downY) > 5) dragMoved = true;
+            translateX = startTX + (e.clientX - downX) * pxToUnits();
+            translateY = startTY + (e.clientY - downY) * pxToUnits();
             updateMapTransform();
         });
-        window.addEventListener('mouseup', () => {
-            if (isDragging) {
-                isDragging = false;
-                mapContainer.style.cursor = 'grab';
-            }
-        });
+
+        const endDrag = () => {
+            isDragging = false;
+            mapContainer.style.cursor = 'grab';
+        };
+        window.addEventListener('pointerup', endDrag);
+        window.addEventListener('pointercancel', endDrag);
+
+        mapContainer.addEventListener('click', (e) => {
+            if (dragMoved) { e.stopPropagation(); e.preventDefault(); dragMoved = false; }
+        }, true);
     </script>
 
     <script>
