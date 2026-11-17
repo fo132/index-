@@ -147,7 +147,7 @@
             updateMapTransform();
         };
 
-        const mapSvg = mapContiner.querySelector('svg');
+        const mapSvg = mapContainer.querySelector('svg');
         let downX = 0, downY = 0, startTX = 0, startTY = 0, dragMoved = false;
 
         mapContainer.style.touchAction= 'none';
@@ -155,7 +155,7 @@
         const pxToUnits = () => 1 / Math.min(mapSvg.clientWidth / 350, mapSvg.clientHeight / 420);
 
         mapContainer.addEventListener('pointerdown', (e) => {
-            if (e.target.closet('button')) return;
+            if (e.target.closest('button')) return;
             isDragging = true;
             dragMoved = false;
             mapContainer.style.cursor = 'grabbing';
@@ -163,7 +163,7 @@
             startTX = translateX; startTY = translateY;
         });
 
-        window.AddEventListener('pointermove', (e) => {
+        window.addEventListener('pointermove', (e) => {
             if (!isDragging) return;
             if (Math.hypot(e.clientX - downX, e.clientY - downY) > 5) dragMoved = true;
             translateX = startTX + (e.clientX - downX) * pxToUnits();
