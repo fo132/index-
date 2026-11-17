@@ -148,9 +148,10 @@
         };
 
         const mapSvg = mapContainer.querySelector('svg');
-        let downX = 0, downY = 0, startTX = 0, startTY = 0, dragMoved = false;
+        let downX = 0, downY = 0, startTX = 0, startTY = 0, dragMoved = false, activeId = null;
 
         mapContainer.style.touchAction= 'none';
+        mapSvg.style.touchAction = 'none';
 
         const pxToUnits = () => 1 / Math.min(mapSvg.clientWidth / 350, mapSvg.clientHeight / 420);
 
@@ -158,14 +159,19 @@
             if (e.target.closest('button')) return;
             isDragging = true;
             dragMoved = false;
-            mapContainer.style.cursor = 'grabbing';
+            activeId = e.pointerId;
             downX = e.clientX; downY = e.clientY;
             startTX = translateX; startTY = translateY;
         });
 
         window.addEventListener('pointermove', (e) => {
-            if (!isDragging) return;
-            if (Math.hypot(e.clientX - downX, e.clientY - downY) > 5) dragMoved = true;
+            if (!isDragging || e.pointerId !== activeId) return;
+            if  (!dragMoved && Math.hypot(e.clientX - downX, e.clientY - downY) > 5) {
+                dragMoved = true;
+                try { mapContainer.setPointerCapture(e.pointerId); } catch (_) {}
+                mapContainer.style.cursor ='grabbing';
+            }
+            if (!dragMoved) return;
             translateX = startTX + (e.clientX - downX) * pxToUnits();
             translateY = startTY + (e.clientY - downY) * pxToUnits();
             updateMapTransform();
@@ -173,10 +179,12 @@
 
         const endDrag = () => {
             isDragging = false;
+            activeId = null;
             mapContainer.style.cursor = 'grab';
         };
         window.addEventListener('pointerup', endDrag);
         window.addEventListener('pointercancel', endDrag);
+        window.addEventListener('lostpointercapture', endDrag);
 
         mapContainer.addEventListener('click', (e) => {
             if (dragMoved) { e.stopPropagation(); e.preventDefault(); dragMoved = false; }
