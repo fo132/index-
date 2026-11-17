@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Featherlog</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1 class="interactive-title" onclick="resetAll()" title="Click to reset all filters">Featherlog ↺</h1>
+    
+    <div class="header-row">
+        <h2>Recent sightings</h2>
+        <a href="#logger" class="btn" style="width:auto; padding:6px 14px; text-decoration:none;" 
+            onclick="document.getElementById('logger').scrollIntoView({behavior: 'smooth'}); return false;">Report a sighting</a>
+    </div>
+
+    <div class="tabs-container">
+        <button class="tab-btn active" onclick="switchTab(this, 'all')">All sightings</button>
+        <button class="tab-btn" onclick="switchTab(this, 'favourites')">Favourited</button>
+    </div>
+
+    <div class="stats">
+        <div class="stat interactive-title" onclick="resetAll()" style="font-size: 1rem; font-weight: normal;" title="Click to reset filters">
+            <span id="sc" style="font-size: inherit; font-weight: inherit;">0</span> Species Recorded
+        </div>
+    </div>
+
+
+    <div class="controls-card">
+    <input id="q" placeholder="Search bird, area, status..." oninput="render()">
+    <div class="filter-row">
+        <select id="rarityFilter" onchange="render()">
+            <option value="all">All rarities</option>
+            <option value="Green">Green Status</option>
+            <option value="Amber">Amber Status</option>
+            <option value="Red">Red Status</option>
+        </select>
+    </div>
+
+    <div style="margin-top: 18px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h3 style="margin: 0; color: var(--accent); font-size: 1.05rem;">UK Sighting Distribution</h3>
+            <button id="resetMapBtn" onclick="filterByMap('')" style="display: none; background: #27272a; color: var(--text); border: none; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem; cursor: pointer;">Reset Map ✕</button>
+        </div>
+
+        <div id="mapContainer" style="position: relative; background: #0d1117; border-radius: 10px; padding: 12px; text-align: center; border: 1px solid #27272a; overflow: hidden; cursor: grab; user-select: none; max-width: 400px; margin: 0 auto;">
+            
+            
+            <div style="position: absolute; top: 15px; right: 15px; background: rgba(20,20,25,0.9); border: 1px solid #3f3f46; border-radius: 6px; display: flex; flex-direction: column; z-index: 10;">
+                <button onclick="zoomMap(0.25)" style="width: 28px; border: none; background: transparent; color: #fff; font-size: 14px; cursor: pointer; border-bottom: 1px solid #3f3f46;" title="Zoom In">+</button>
+                <button onclick="zoomMap(-0.25)" style="width: 28px; height: 28px; border: none; background: transparent; color: #fff; font-size: 14px; cursor: pointer;" title="Zoom Out">-</button>
+            </div>
+
+
+            <svg viewBox="0 0 350 420" style="width: 100%; height: 280px; display: block; margin: 0 auto;">
+                <g id="mapGroup" transform="translate(0, 0) scale(1)">
+
+                <path d="M 60,170 C 50,165 40,175 35,190 C 30,205 40,225 37,240 C 35,255 45,270 60,275 C 75,280 80,260 85,245 C 90,230 80,210 83,195 C 85,185 70,175 60,170 Z" fill="#1e293b" stroke="#334155" stroke-width="1.5" style="pointer-events: none;" />
+
+                <path d="M 155,25 C 145,40 125,65 135,85 C 145,105 115,125 130,155 C 140,175 125,195 130,215 C 135,235 150,265 145,295 C 140,325 155,355 170,375 C 185,395 205,405 210,385 C 215,365 200,335 205,305 C 210,275 230,255 225,225 C 220,195 235,175 230,145 C 225,115 195,95 190,75 C 185,55 165,35 155,25 Z" fill="#1e293b" stroke="#334155" stroke-width="1.5" style="pointer-events: none;" />
+                
+                <g onclick="filterByMap('Bradford')" style="cursor: pointer;"> 
+                    <title>Bradford Cluster</title>
+                    <circle cx="155" cy="175" r="14" fill="#c084fc" opacity="0.25" />
+                    <circle cx="155" cy="175" r="6" fill="#c084fc" />
+                    <text x="168" y="179" fill="#ffffff" font-size="10" font-weight="600" font-family="system-ui">Bradford</text>
+                </g>
+
+                <g onclick="filterByMap('Sherwood')" style="cursor: pointer;">
+                    <title>Sherwood Cluster</title>
+                    <circle cx="170" cy="205" r="14" fill="#10b981" opacity="0.25" />
+                    <circle cx="170" cy="205" r="7" fill="#10b981" />
+                    <text x="183" y="209" fill="#ffffff" font-size="10" font-weight="600" font-family="system-ui">Sherwood</text>
+                </g>
+
+                <g onclick="filterByMap('London')" style="cursor: pointer;"> 
+                    <title>London Cluster</title>
+                    <circle cx="205" cy="315" r="16" fill="#10b981" opacity="0.25" />
+                    <circle cx="205" cy="315" r="7" fill="#10b981" />
+                    <text x="218" y="319" fill="#ffffff" font-size="10" font-weight="600" font-family="system-ui">London</text>
+                </g>
+
+                <g onclick="filterByMap('Coast')" style="cursor: pointer;"> 
+                    <title>Coast Cluster</title>
+                    <circle cx="120" cy="245" r="14" fill="#3b82f6" opacity="0.25" />
+                    <circle cx="120" cy="245" r="6" fill="#3b82f6" />
+                    <text x="75" y="249" fill="#ffffff" font-size="10" font-weight="600" font-family="system-ui">Coast</text>
+                </g>
+            </g>
+        </svg>
+        <div style="display: flex; justify-content: center; gap: 12px; font-size: 0.7rem; background: #121215; padding: 5px; border-radius: 6px; border: 1px solid #27272a; color: #a1a1aa;">
+            <span>🟢 Secure</span>
+            <span>🟠 Monitor</span>
+            <span>🔴 Priority</span>
+        </div>
+        <div id="mapHint" style="font-size: 0.8rem; color: #a1a1aa; margin-top: 8px;">Click any region pin on the map to filter sightings</div>
+        </div>
+    </div>
+
+     <div class="pills" style="margin-top: 15px;">
+        <button class="pill active" onclick="setTimePill(this, 'all')">All time</button>
+        <button class="pill" onclick="setTimePill(this, 'week')">This week</button>
+        <button class="pill" onclick="setTimePill(this, 'month')">This month</button>
+    </div>
+</div>
+
+<div id="list"></div>
+
+    <div id="logger" class="logger">
+        <h3>Quick Sighting Logger</h3>
+        <input id="birdName" placeholder="Bird name..." style="margin-bottom:8px">
+        <input id="birdArea" placeholder="Location..." style="margin-bottom:8px">
+        <select id="birdStatus" style="margin-bottom:12px">
+            <option value="Green">Green Status</option>
+            <option value="Amber">Amber Status</option>
+            <option value="Red">Red Status</option>
+        </select>
+        <button id="logBtn" class="btn" onclick="addBird()">Log Sighting</button>
+    </div>
+
+    <script src="Database.js"></script>
+    <script src="birds-images.js"></script>
+    <script>
+
+        let mapScale = 1;
+        let translateX = 0;
+        let translateY = 0;
+        let isDragging = false;
+        let startX = 0, startY = 0;
+
+        const mapContainer = document.getElementById('mapContainer');
+        const mapGroup =document.getElementById('mapGroup');
+
+
+         const updateMapTransform = () => {
+            mapGroup.setAttribute('transform', `translate(${translateX}, ${translateY}) scale(${mapScale})`);
+        };
+
+        const zoomMap = (amount) => {
+            mapScale = Math.min(Math.max(mapScale + amount, 0.8), 3);
+            updateMapTransform();
+        };
+
+        const resetMapView = () => {
+            mapScale = 1; translateX = 0; translateY = 0;
+            updateMapTransform();
+        };
+
+        mapContainer.addEventListener('mousedown', (e) => {
+            if (e.target.closest('button')) return;
+            isDragging = true;
+            mapContainer.style.cursor = 'grabbing';
+            startX = e.clientX - translateX;
+            startY = e.clientY - translateY;
+            updateMapTransform();
+        });
+        window.addEventListener('mousemove', (e) => {
+            if (!isDragging) return;
+            translateX = e.clientX - startX;
+            translateY = e.clientY - startY;
+            updateMapTransform();
+        });
+        window.addEventListener('mouseup', () => {
+            if (isDragging) {
+                isDragging = false;
+                mapContainer.style.cursor = 'grab';
+            }
+        });
+    </script>
+
+    <script>
+        let selectedTime = "all";
+        let selectedTab = "all";
+        let selectedRegion = "";
+        const ms = ["J","F","M","A","M","J","J","A","S","O","N","D"];
+        const scEL = document.getElementById('sc');
+        const listEL = document.getElementById('list');
+        const PLACEHOLDER = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+            '<svg xmlns="http://www.w3.org/2000/svg" width="60" height="60">' + 
+            '<rect width="60" height="60" fill="#27272a"/>' +
+            '<text x="30" y="38" font-size="26" text-anchor="middle">🐦</text></svg>');
+        const esc = s => String(s).replace(/[&<>"'']/g, c =>
+        ({'&': '&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+        
+
+        const resetAll = () => {
+            document.getElementById('q').value = '';
+            document.getElementById('rarityFilter').value = 'all';
+            selectedTime = 'all';
+            selectedTab = 'all';
+            selectedRegion = '';
+            document.getElementById('resetMapBtn').style.display = 'none';
+            document.getElementById('mapHint').textContent = 'Click any region pin on the map to filter sightings';
+
+            document.querySelectorAll('.tabs-container .tab-btn').forEach((t, idx) => {
+                t.classList.toggle('active', idx === 0);
+            });
+
+                document.querySelectorAll('.pill').forEach((p, idx) => {
+                    p.classList.toggle('active', idx === 0);
+            });
+
+            resetMapView();
+            render();
+        };
+
+
+        const filterByMap = (region) => {
+            selectedRegion = region;
+            document.getElementById('resetMapBtn').style.display = region ? 'inline-block' : 'none';
+            document.getElementById('mapHint').textContent = region
+                ? `Showing sightings in: ${region}`
+                : 'Click any region pin on the map to filter sightings';
+            render();
+        };
+        const setTimePill = (el, timeVal) => {
+            document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+            el.classList.add('active');
+            selectedTime = timeVal;
+            render();
+        };
+
+        const switchTab = (el, tabVal) => {
+            document.querySelectorAll('.tabs-container .tab-btn').forEach(p => p.classList.remove('active'));
+            el.classList.add('active');
+            selectedTab = tabVal;
+            render();
+        };
+
+        const toggleFavourite = (originalIndex) => {
+            birds[originalIndex].isFavourite = !birds[originalIndex].isFavourite;
+            render();
+        };
+
+        const deleteBird = (originalIndex) => {
+            birds.splice(originalIndex, 1);
+            render();
+        };
+
+        const render = () => {
+            const v = document.getElementById('q').value.toLowerCase().trim();
+            const r = document.getElementById('rarityFilter').value;
+           
+            const f = birds.filter(b => {
+                const matchText = v === "" ||
+                        b.n.toLowerCase().includes(v) ||
+                        b.a.toLowerCase().includes(v) ||
+                        b.s.toLowerCase().includes(v);
+                    const matchRarity = r === "all" || b.s === r;
+                    const matchTime = selectedTime === "all" || 
+                        (b.loggedAt && Date.now() - b.loggedAt <= (selectedTime === "week" ? 7 : 30) * 86400000);
+                    const matchTab = selectedTab === "all" || (selectedTab === "favourites" && b.isFavourite);
+                    const matchRegion = selectedRegion === "" || 
+                        b.a.toLowerCase().trim() === selectedRegion.toLowerCase().trim();
+                    return matchText && matchRarity && matchTime && matchTab && matchRegion;
+        });
+
+            scEL.textContent = f.length;
+            listEL.innerHTML = f.length ? 
+            f.map(b => {
+                let originalIndex = birds.indexOf(b);
+                return `
+                <div class="card">
+                    <img class="bird-img" src="${esc(b.img || PLACEHOLDER)}" alt="${esc(b.n)}" onerror="this.onerror=null;this.src=PLACEHOLDER">
+                    <div class="card-content">
+                        <div class="row">
+                            <span><b>${esc(b.n)}</b></span>
+                            <span class="badge ${esc(b.s)}"> ${esc(b.s)}</span>
+                    </div>
+                    <div style="font-size:0.85rem;color:#a1a1aa; margin-bottom:4px;">
+                            ${esc(b.a)} · ${b.reps || 1} reported
+                    </div>
+                    <div class="timeline-container">
+                        <div class="timeline">${ms.map((_, i) => `<div class="bar ${b.months.includes(i+1) ? 'active' + ((b.peak || b.months).includes(i+1) ? ' seasonal' : '') : ''}"></div>`).join('')}</div>
+                        <div class="labels">${ms.map(m => `<span>${m}</span>`).join('')}</div>
+                    </div>
+                    <button class="delete-btn" onclick="deleteBird(${originalIndex})">Delete</button>
+                </div>
+                <button class="heart-btn" onclick="toggleFavourite(${originalIndex})" title="Save sighting">${b.isFavourite ? '❤️' : '♡'}</button>
+            </div>`;
+        }).join('') : '<p style="color:#a1a1aa">No records found.</p>';
+    };
+
+        const addBird = () => {
+            const name = birdName.value.trim();
+            const area = birdArea.value.trim();
+            const status = birdStatus.value;
+            if(!name || !area) return alert('Please fill in all fields!');
+
+            const bird = { 
+                n: name, 
+                s: status, 
+                a: area, 
+                c: 'Logged', 
+                months: [new Date().getMonth() + 1],
+                peak: [new Date().getMonth() + 1],
+                img: '',
+                reps: 1,
+                time: 'all',
+                loggedAt: Date.now(),
+                isFavourite: false
+            };
+            birds.unshift(bird);
+
+            document.getElementById('birdName').value = ''; 
+            document.getElementById('birdArea').value = '';
+            render();
+            if (!bird.img) loadBirdImages([bird]).then(render);
+
+            const btn = document.getElementById('logBtn');
+            btn.textContent = 'Sighting Logged!';
+            btn.classList.add('success');
+            setTimeout(() => {
+                btn.textContent = 'Log Sighting';
+                btn.classList.remove('success');
+            }, 1200);
+        };
+
+        ['birdName', 'birdArea'].forEach(id =>
+            document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter')
+addBird(); }));
+        
+        render();
+        loadBirdImages().then(render);
+    </script>
+</body>
+</html>
